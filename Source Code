@@ -1,0 +1,50 @@
+from youtubesearchpython import *
+import spotipy
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.by import By
+import time
+from spotipy.oauth2 import SpotifyClientCredentials
+
+#make a acoount in Spotify API and fill in the Id and Secret
+id= ''
+secret= ''
+
+def url_search(b):
+    play_list_uri = '' #copy playlist URL
+    spotify = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(client_id=id,client_secret=secret))
+    number = int(b)
+    names = []
+    urls = []
+    results = spotify.playlist_tracks(play_list_uri,limit = number)
+    for i in range(number):
+        artist = results['items'][i]['track']['artists'][0]['name']
+        song = results['items'][i]['track']['name']
+        names.append(artist+song)
+    for i in names:
+        videosSearch = VideosSearch(i, limit = 1)
+        urls.append(videosSearch.result()['result'][0]['link'])
+    return(urls)
+def Download(a):
+    driver = webdriver.Chrome()
+    driver.get('https://tuberipper.com/save/mp4')
+    button = driver.find_element(By.XPATH,'//*[@id="videoBtn"]')
+    searchbox = driver.find_element(By.XPATH,'//*[@id="videoUrl"]')
+    for i in a:
+        searchbox.send_keys(i)
+        button.click()
+        time.sleep(4)
+        page = driver.find_element(By.XPATH, '/html')
+        for i in range(7):
+            page.send_keys(Keys.DOWN)
+        time.sleep(2)
+        download = driver.find_element(By.XPATH, '//*[@id="output"]/div[3]/div[1]/a')
+        download.click()
+        time.sleep(4)
+        driver.find_element(By.XPATH, '//*[@id="videoUrl"]').clear()
+        continue
+    while True:
+        pass
+        
+#input the number of songs will be downloaded
+Download(url_search())
